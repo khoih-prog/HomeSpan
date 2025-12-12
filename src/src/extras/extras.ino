@@ -27,26 +27,21 @@
 
 #include "Pixel.h"
 
-WS2801_LED p(33, 27);
-WS2801_LED::Color empty[8]={};
-WS2801_LED::Color colors[8]={WS2801_LED::RGB(0, 50, 0),  WS2801_LED::RGB(50, 50, 0), WS2801_LED::RGB(50, 0, 0) ,WS2801_LED::RGB(0, 0, 0), WS2801_LED::RGB(0, 0, 255), WS2801_LED::RGB(0,0,0), WS2801_LED::RGB(0,0,255),WS2801_LED::RGB(255,0,0)};
+ WS2801_LED *p;
+//WS2801_LED::Color empty[8]={};
+//WS2801_LED::Color colors[8]={WS2801_LED::RGB(0, 50, 0),  WS2801_LED::RGB(50, 50, 0), WS2801_LED::RGB(50, 0, 0) ,WS2801_LED::RGB(0, 0, 0), WS2801_LED::RGB(0, 0, 255), WS2801_LED::RGB(0,0,0), WS2801_LED::RGB(0,0,255),WS2801_LED::RGB(255,0,0)};
 
 void setup() {
 
   Serial.begin(115200);
   delay(2000);
-  Serial.printf("\n\nReady\n");
-  long unsigned int t1, t2;
-  t1=millis();
-  p.set(WS2801_LED::RGB(0,255,0),1000000);
-  t2=millis();
-  printf("Millis: %lu\n",t2-t1);
-  delay(5000);
+  Serial.printf("\n\nReady %d %d\n",F14,F22);
+  p=new WS2801_LED(F14, F22);
 }
 
 void loop() {
-  p.set(WS2801_LED::RGB(255,0,0),8);
+  p->set(WS2801_LED::RGB(255,0,0),25);
   delay(1000);
-  p.set(WS2801_LED::RGB(0,0,255),8);
+  p->set(WS2801_LED::RGB(0,0,255),25);
   delay(1000);    
 }
