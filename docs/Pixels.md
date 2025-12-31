@@ -1,14 +1,19 @@
 # Addressable RGB LEDs
 
-HomeSpan includes two dedicated classes that provide for easy control of "addressable" RGB LEDs.  The **Pixel()** class is used for RGB, RGBW, RGBWC, and WC LEDs that require only a single "data" control wire, such as this 8-pixel [NeoPixel RGB Stick](https://www.adafruit.com/product/1426) or this single-pixel [NeoPixel RGBW LED](https://www.adafruit.com/product/2759).  The **Dot()** class is used for RGB LEDs that require two control wires ("data" and "clock"), such as this 144-pixel [DotStar RGB Strip](https://www.adafruit.com/product/2241) or this 60-pixel [RGB LED Strip](https://www.sparkfun.com/products/14015).
+HomeSpan includes three dedicated classes that provide for easy control of "addressable" RGB LEDs:
 
-Both classes allow you to individually set each of the "pixels" in a multi-pixel LED strip to a different 24-bit RGB (red/green/blue) color.  The Pixel class also supports 16-bit WC (warm-white/cool-white) pixels, 32-bit RGBW (red/green/blue/white) pixels, and 40-bit RGBWC pixels (i.e. red/green/blue/warm-white/cool-white).  Alternatively, the classes allow you to simply specify a single color to duplicate across all pixels.
+* **Pixel()** - this class is used for RGB, RGBW, RGBWC, and WC LEDs that require only a single "data" control wire using the NeoPixel protocol, such as this 8-pixel [NeoPixel RGB Stick](https://www.adafruit.com/product/1426) or this single-pixel [NeoPixel RGBW LED](https://www.adafruit.com/product/2759)
 
-The methods for both classes are nearly identical, which allows you to readily interchange code written for single-wire devices to use with two-wire devices (and vice-versa) with only minor modifications.
+* **Dot()** - this class is used for RGB LEDs that require two control wires ("data" and "clock") using the DotStar protocol, such as this 144-pixel [DotStar RGB Strip](https://www.adafruit.com/product/2241) or this 60-pixel [RGB LED Strip](https://www.sparkfun.com/products/14015).
+* **WS2801_LED()** - this class is used for RGB LEDs that require two control wires ("data" and "clock") using the WS2801 protocol, such as this 25-pixel [Diffused Flat Digital RGB LED Strand](https://www.adafruit.com/product/738)
 
-## *Pixel(uint8_t pin, [const char \*pixelType])*
+All three classes allow you to individually set each of the "pixels" in a multi-pixel LED strip to a different 24-bit RGB (red/green/blue) color.  The Pixel class also supports 16-bit WC (warm-white/cool-white) pixels, 32-bit RGBW (red/green/blue/white) pixels, and 40-bit RGBWC pixels (i.e. red/green/blue/warm-white/cool-white).  Alternatively, the classes allow you to simply specify a single color to duplicate across all pixels.
 
-Creating an instance of this **class** configures the specified *pin* to output a waveform signal suitable for controlling a single-wire, addressable RGB, WC, RGBW, or RGBWC LED device with an arbitrary number of pixels.  Arguments, along with their defaults if left unspecified, are as follows:
+The methods for each of classes are nearly identical, which allows you to readily interchange code written for one type of device to use with a different type of device with only minor modifications.
+
+## *Pixel(uint8_t pin [, const char \*pixelType])*
+
+Creating an instance of this **class** configures the specified *pin* to output a waveform signal suitable for controlling a single-wire, addressable RGB, WC, RGBW, or RGBWC LED device based on the *NeoPixel* protocol with an arbitrary number of pixels.  Arguments, along with their defaults if left unspecified, are as follows:
 
   * *pin* - the pin on which the RGB control signal will be output; normally connected to the "data" input of the addressable LED device
     
@@ -155,7 +160,7 @@ Note the **RFControl** class also uses the ESP32's RMT peripheral so any instanc
 
 ## *Dot(uint8_t dataPin, uint8_t clockPin)*
 
-Creating an instance of this **class** configures the specified pins to output waveform signals suitable for controlling a two-wire, addressable RGB LED device with an arbitrary number of pixels.  Such devices typically contain SK9822 or APA102 LEDs, or an embedded WS2801 driver chip.  Arguments, along with their defaults if left unspecified, are as follows:
+Creating an instance of this **class** configures the specified pins to output waveform signals suitable for controlling a two-wire, addressable RGB LED device based on the *DotStar* protocol with an arbitrary number of pixels.  Arguments, along with their defaults if left unspecified, are as follows:
 
   * *dataPin* - the pin on which the RGB data signal will be output; normally connected to the "data" input of the addressable LED device
   * *clockPin* - the pin on which the RGB clock signal will be output; normally connected to the "clock" input of the addressable LED device
@@ -170,7 +175,7 @@ The two main methods to set pixel colors are:
 
   * individually sets the color of each pixel in a multi-pixel device to the color values specified in the **Color** array *\*color*, of *nPixels* size, where the  first pixel of the device is set to the value in *color\[0\]*, the second pixel is set to the value in *color\[1\]* ... and the last pixel is set to the value in *color\[nPixels-1\]*.  Similar to above, it is not a problem if the value specified for *nPixels* does not match the total number of actual RGB pixels in your device
 
-In both of the methods above, colors are stored in a 32-bit **Color** object configured to hold three 8-bit RGB values plus a 5-bit value that can be used to limit the LED current.  **Color** objects can be instantiated as single variables (e.g. `Dot::Color myColor;`) or as arrays (e.g. `Dot::Color myColors\[8\];`).  Note that the **Color** object used by the **Dot** class is scoped to the **Dot** class itself, so you need to use the fully-qualified class name "Dot::Color".  Once a **Color** object is created, the color it stores can be set using one of the two following methods:
+In both of the methods above, colors are stored in a 32-bit **Color** object configured to hold three 8-bit RGB values plus a 5-bit value that can be used to limit the LED current.  **Color** objects can be instantiated as single variables (e.g. `Dot::Color myColor;`) or as arrays (e.g. `Dot::Color myColors[8];`).  Note that the **Color** object used by the **Dot** class is scoped to the **Dot** class itself, so you need to use the fully-qualified class name "Dot::Color".  Once a **Color** object is created, the color it stores can be set using one of the two following methods:
   
   * `Color RGB(uint8_t r, uint8_t g, uint8_t b, uint8_t driveLevel=31)`
 
@@ -186,7 +191,7 @@ In both of the methods above, colors are stored in a 32-bit **Color** object con
       
 Note both methods above return the completed **Color** object itself and can thus be used wherever a **Color** object is required:  For example: `Dot p(5,6); Dot::Color myColor; p.set(myColor.RGB(255,215,0))` sets the color of a single pixel device attached to pins 5 and 6 to bright gold.
 
-The **Pixel** class also supports the following class-level methods as a convenient alternative to creating colors:
+The **Dot** class also supports the following class-level methods as a convenient alternative to creating colors:
   
 * `static Color RGB(uint8_t r, uint8_t g, uint8_t b, uint8_t driveLevel=31)`
   * equivalent to `return(Color().RGB(r,g,b,driveLevel));`
@@ -198,9 +203,92 @@ The **Pixel** class also supports the following class-level methods as a conveni
 
 Unlike the **Pixel** class, the **Dot** class does *not* utilize the ESP32's RMT peripheral and thus there are no limits to the number of **Dot** objects you can instantiate.  Also, since the clock signal is generated by the **Dot** class itself, there are no timing parameters to set and no need for a *setTiming()* method.
 
+
+## *WS2801_LED(uint8_t dataPin, uint8_t clockPin [, spi_host_device_t spiBus])*
+
+Creating an instance of this **class** configures the specified pins to output waveform signals suitable for controlling a two-wire, addressable RGB LED device based on the *WS2801* protocol with an arbitrary number of pixels.  Arguments, along with their defaults if left unspecified, are as follows:
+
+  * *dataPin* - the pin on which the RGB data signal will be output; normally connected to the "data" input of the addressable LED device
+  * *clockPin* - the pin on which the RGB clock signal will be output; normally connected to the "clock" input of the addressable LED device
+  * *spiBus* - specifies the SPI bus controller to be used for signal generation.  Allowed values and defaults depend on the device:
+    * for the ESP32, *spiBus* can be set to either **SPI2_HOST** or **SPI3_HOST**.  If unspecified, *spiBus* defaults to **SPI2_HOST**
+    * for the ESP32-S2/S3, *spiBus* can be set to either **SPI2_HOST** or **SPI3_HOST**.  If unspecified, *spiBus* defaults to **SPI3_HOST**
+    * for the ESP32-C3/C5/C6, *spiBus* can only be set to **SPI2_HOST**, which is therefore the default if unspecified
+
+The two main methods to set pixel colors are:
+
+* `void set(Color color, int nPixels=1)`
+
+  * sets the color of a pixel in a single-pixel device, or equivalently, the color of the first *nPixels* in a multi-pixel device, to *color*, where *color* is an object of type **Color** defined below.  If unspecified, *nPixels* defaults to 1 (i.e. a single pixel).  It is not a problem if the value specified for *nPixels* does not match the total number of actual RGB pixels in your device; if *nPixels* is less than the total number of device pixels, only the first *nPixels* will be set to *color*;  if *nPixels* is greater than the total number of device pixels, the device will simply ignore the additional input
+  
+* `void set(Color *color, int nPixels)`
+
+  * individually sets the color of each pixel in a multi-pixel device to the color values specified in the **Color** array *\*color*, of *nPixels* size, where the  first pixel of the device is set to the value in *color\[0\]*, the second pixel is set to the value in *color\[1\]* ... and the last pixel is set to the value in *color\[nPixels-1\]*.  Similar to above, it is not a problem if the value specified for *nPixels* does not match the total number of actual RGB pixels in your device
+
+In both of the methods above, colors are stored in a 24-bit **Color** object configured to hold three 8-bit RGB values.  **Color** objects can be instantiated as single variables (e.g. `WS2801_LED::Color myColor;`) but they should NOT be directly instantiated as simple array variables (e.g. `WS2801_LED::Color myColors[8];`).  This is because the **WS2801_LED** requires the DMA features of the SPI bus to ensure color data is properly transmitted to the LEDs, and thus the **Color** array must be created in 32-bit aligned, DMA-capable memory.
+
+The ESP32 operating system provides two ways of creating variables stored in 32-bit aligned DMA-capable memory.  The first is to add the attribute `DMA_ATTR` to the instantation of a simple array as follows: `DMA_ATTR WS2801_LED::Color c[5];`.
+
+However, this attribute can only be used when creating global variables outside of any function. The `DMA_ATTR` cannot be used for local variables since local variables are added to the stack during run-time and there is no way for the operating system to guarantee 32-bit alignment.  Instead, to create a local array of **Color** objects using 32-bit aligned DMA-capable memory, instantiate a *pointer* to a **Color** array and set it equal to the memory segment returned by the following static class function:
+
+* `static Color *getMem(size_t nColors)`
+
+  * returns a **Color** pointer to a dynamically-allocated 32-bit aligned segment of DMA-capable memory sized for *nColors* objects
+  * example: `WS2801_LED::Color *myColors = WS2801_LED::getMem(8)` sets *myColors* to an array of 8 **Color** objects
+  * remember that as with any dynamically-allocated memory, it must to freed (e.g. `free(myColors);`) when no longer needed.  Such memory is not automatically destroyed when the end of the function is reached!
+
+Note that the **Color** object used by the **WS2801_LED** class is scoped to the **WS2801_LED** class itself, so you need to use the fully-qualified class name "WS2801_LED::Color" when creating Color variables.
+
+Once a **Color** object is created, the color it stores can be set using one of the two following methods:
+  
+  * `Color RGB(uint8_t r, uint8_t g, uint8_t b)`
+
+    * where *r*, *g*, and *b*, represent 8-bit red, green, and blue values over the range 0-255.
+    * example: `myColor.RGB(128,128,0)` sets myColor to yellow at half-brightness using a 50% duty cycle for the red and green LEDs (i.e. 128/256)
+       
+  * `Color HSV(float h, float s, float v)`
+    
+    * where *h*=Hue, over the range 0-360; *s*=Saturation percentage from 0-100; and *v*=Brightness percentage from 0-100.  These values are converted to equivalent 8-bit RGB values (0-255) for storage in the *Color* object.
+    * example: `myColor.HSV(120,100,50)` sets myColor to fully-saturated green at half-brightness using a 50% duty cycle
+      
+Note both methods above return the completed **Color** object itself and can thus be used wherever a **Color** object is required:  For example: `WS2801_LED p(5,6); WS2801_LED::Color myColor; p.set(myColor.RGB(255,215,0))` sets the color of a single pixel device attached to pins 5 and 6 to bright gold.
+
+The **WS2801_LED** class also supports the following class-level methods as a convenient alternative to creating colors:
+  
+* `static Color RGB(uint8_t r, uint8_t g, uint8_t b)`
+  * equivalent to `return(Color().RGB(r,g,b));`
+  * example: `WS2801_LED p(8,11);  p.set(WS2801_LED::RGB(0,0,255),8);` sets the color of each pixel in an 8-pixel device to blue
+
+* `static Color HSV(float h, float s, float v)`
+  * equivalent to `return(Color().HSV(h,s,v));`
+  * example: `WS2801_LED p(8,11);  p.set(WS2801_LED::HSV(240,100,75),8);` sets the color of each pixel in an 8-pixel device to deep blue at 75% brightness
+ 
+Of final note, *WS2801* devices have much slower refresh rates then *DotStar* devices.  By default, the **WS2801_LED** class set the SPI clock frequency to 2MHz for each instantiated object, which matches the specs for the WS2801 chip.  However, if needed you can set a different SPI clock frequency for any given **WS2801_LED** object using the following *member-based* method:
+
+* `void setTiming(uint32_t freq)`
+
+  * sets the pixel transmission frequency to *freq* (in Hz)
+  * example: `WS2801_LED p(8,11); p.setTiming(1000000); p.set(WS2801_LED::RGB(0,0,255),8);` changes the transmission frequency to 1MHz before setting the color of each pixel in an 8-pixel device to blue
+
+#### WS2801 Devices and SPI Busses - Technical Details (optional reading)
+
+*DotStar* and *WS2801* devices use nearly identical 2-wire protocols to represent and transmit pixel data.  However, whereas both devices utilize the same 3-byte format to control each pixel's 24-bit RGB color, *DotStar* devices also include a fourth byte to control each pixel's built-in 32-step drive current limiter (such control is not available on *WS2801* devices).  Importantly, since 32 steps can be represented using only 5 bits, this leaves *DotStar* devices with 3 extra bits in its fourth byte that it uses to encode whether any given 4-byte transmission should be interpreted by the device as a valid pixel color, or if the device should instead interpret it as a start-of-transmission indicator, which is used to reset the device's latching of transmitted data back to the first pixel in a strand.
+
+Because *WS2801* use only 3 bytes per pixel, there are no extra bits to encode a start-of-transmission indicator.  Instead, *WS2801* devices reset their latching of transmitted data back to the first pixel in a strand whenever the clock signal is driven low for more than 500𝛍s.  In simple single-threaded operating systems typicvally used by single-processor microcontrollers, proper implementation of the clock signal can be done directly in software.  However, the ESP32 uses a full multi-threaded operating system capable of support multi-processor microcontrollers.  As a result, the *WS2801* protocol cannot be implemented completely in software because any CPU task-switching performed by the operating system while pixel data is being transmitted can (and often does) leave the clock signal in a low state for more than 500𝛍s, which causes the pixel device to reset in mid-transmission.
+
+To solve this problem, rather than implement the *WS2801* protocol in software, the **WS2801_LED** class uses the ESP32's built-in SPI periperal to transmit data.  Provided that the SPI peripheral is configured to use DMA memory, transmission of data occurs at the *hardware* level and is therefore unaffected by any CPU task-switching done by the operating system while a transmission is in progress.
+
+ESP32, ESP32-S2, and ESP-S3 devices have 4 SPI bus controllers (SPI0-SPI3).  SPI0 and SPI1 are reserved for communicating with flash memory and SPI RAM, respectively.  This leaves SPI2 and SPI3 available as general-purpose SPI busses for use by any sketch.  On the ESP32, the Arduino-ESP32 Core instantiates its global SPI object using the SPI3 bus, so the **WS2801_LED** class defaults to using the SPI2 bus instead.  In contrast, on the ESP32-S2 and ESP32-S3, the Arduino-ESP32 Core instantiates its global SPI object using the SPI2 bus, so the **WS2801_LED** class defaults to using the SPI3 bus instead.
+
+ESP32-C3, ESP32-C5, and ESP32-C6 decvices have only 3 SPI bus controllers (SPI0-SPI2).  Since SPI0 and SPI1 are reserved for communicating with flash memory and SPI RAM, this leave just SPI2 available for use by the **WS2801_LED** class as well as by the Arduino-ESP32 Core's instantiation of its global SPI object.
+
+The **WS2801_LED** class has been designed to minimize any interference with the Arduino-ESP32 Core's global SPI object and it **should** be fine for your sketch to use the same SPI bus (either SPI2, or SPI3 if available) for any external SPI devices (such as an SPI-based Ethernet module) concurrently with the **WS2801_LED** class.
+
+As noted above, to ensure data transmission occurs completely in hardware without drawing upon the CPU, the data to be transmitted needs to be stored in DMA-capable memory.   This is the purpose of static `getMem()` function - it returns a pointer to a dynamically-allocated 32-bit aligned DMA-capable segment of memory suitable for use with the SPI DMA hardware.
+
 ### Example Sketches
 
-A fully worked example showing how to use the Pixel library within a HomeSpan sketch to control an RGB Pixel Device, an RGBW Pixel Device, and an RGB DotStar Device, all from the Home App on your iPhone, can be found in the Arduino IDE under [*File → Examples → HomeSpan → Other Examples → Pixel*](../examples/Other%20Examples/Pixel).  A second example demonstrating how to implement an RGBWC Pixel light-strip with separate Home App controls for the RGB and WC LEDs can be found in the Arduino IDE under [*File → Examples → HomeSpan → Other Examples → Pixel-RGBWC*](../examples/Other%20Examples/Pixel-RGBWC).
+A fully worked example showing how to use the **Pixel**, **Dot** and **WS2801_LED** classes within a HomeSpan sketch to control an RGB Pixel Device, an RGBW Pixel Device, an RGB DotStar Device, and an RGB WS2801 Device, all from the Home App on your iPhone, can be found in the Arduino IDE under [*File → Examples → HomeSpan → Other Examples → Pixel*](../examples/Other%20Examples/Pixel).  A second example demonstrating how to implement an RGBWC Pixel light-strip with separate Home App controls for the RGB and WC LEDs can be found in the Arduino IDE under [*File → Examples → HomeSpan → Other Examples → Pixel-RGBWC*](../examples/Other%20Examples/Pixel-RGBWC).
 
 For a more complete showcase of the Pixel library , check out [Holiday Lights](https://github.com/HomeSpan/HolidayLights) on the [HomeSpan Projects page](https://github.com/topics/homespan).  This sketch demonstrates how the Pixel library can be used to generate a variety of special effects with a 60-pixel RGBW strip.  The sketch also showcases the use of HomeSpan's [Custom Characteristic macro](Reference.md#custom-characteristics-and-custom-services-macros) to implement a special-effects "selector" button for use in the Eve for HomeKit App.
 
